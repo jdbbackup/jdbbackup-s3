@@ -10,7 +10,7 @@ import com.fathzer.jdbbackup.DestinationManager;
 import com.fathzer.jdbbackup.utils.LoginParser;
 
 class BucketPath {
-	private static final String WRONG_DEST_MESS = "Destination should conform to the format [key:secret@]bucket/path";
+	private static final String WRONG_DEST_MESS = "Destination should conform to the format [key:secret@][region:]bucket/path";
 	private BasicAWSCredentials credentials;
 	private String region;
 	private String bucket;

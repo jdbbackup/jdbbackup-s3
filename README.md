@@ -8,3 +8,5 @@ If *accessKey:secretKey* are not provided, the manager uses the [default AWS cre
 
 If *region* is not provided, the manager uses the [default AWS region provider chain](https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/regions/providers/DefaultAwsRegionProviderChain.html).
 
+## TODO
+Remove the toBeDeleted folder and task in .github/workflows/build.yml
