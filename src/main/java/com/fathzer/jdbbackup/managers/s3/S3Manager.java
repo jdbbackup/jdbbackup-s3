@@ -65,7 +65,7 @@ public class S3Manager implements DestinationManager<BucketPath> {
 			conf.withProxyHost(proxy.getHost()).withProxyPort(proxy.getPort());
 			if (proxy.getLogin()!=null) {
 				conf.withProxyUsername(proxy.getLogin().getUserName());
-				if (proxy.getLogin()!=null && proxy.getLogin().getPassword().length>0) {
+				if (proxy.getLogin().getPassword().length>0) {
 					conf.withProxyPassword(String.valueOf(proxy.getLogin().getPassword()));
 				}
 			}

@@ -45,6 +45,14 @@ class S3ManagerTest {
 		// No auth => client should use a S3CredentialProviderChain
 		assertEquals(ClientInspector.getDefaultProviderClass(), ClientInspector.getCredentialsProviderChain(client).getClass());
 		
+		// With authenticated proxy without password
+		s3.setProxy(ProxySettings.fromString("user:@host:3128"));
+		client = (AmazonS3Client) s3.getClient(null, "region");
+		assertEquals("host", client.getClientConfiguration().getProxyHost());
+		assertEquals(3128, client.getClientConfiguration().getProxyPort());
+		assertEquals("user", client.getClientConfiguration().getProxyUsername());
+		assertNull(client.getClientConfiguration().getProxyPassword());
+
 		// With unauthenticated proxy
 		s3.setProxy(ProxySettings.fromString("otherhost:4128"));
 		client = (AmazonS3Client) s3.getClient(null, "region");
