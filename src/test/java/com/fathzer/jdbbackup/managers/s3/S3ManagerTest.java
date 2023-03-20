@@ -8,9 +8,37 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 
 import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.DefaultAwsRegionProviderChain;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.ClientInspector;
+import com.fathzer.jdbbackup.utils.ProxySettings;
 
 class S3ManagerTest {
+	
+	@Test
+	void testScheme() {
+		assertEquals("s3", new S3Manager().getScheme());
+	}
+	
+	@Test
+	void testBuildClient() {
+		S3Manager s3 = new S3Manager();
+		AmazonS3Client client = (AmazonS3Client) s3.getClient(new BasicAWSCredentials("access", "secret"), "region");
+		assertEquals("region",client.getRegionName());
+		assertNull(client.getClientConfiguration().getProxyHost());
+		// No auth => client should use a customized credential provider chain
+		assertNotEquals(ClientInspector.getDefaultProviderClass(), ClientInspector.getCredentialsProviderChain(client).getClass());
+
+		s3.setProxy(ProxySettings.fromString("user:password@host:3128"));
+		client = (AmazonS3Client) s3.getClient(null, "region");
+		assertEquals("host", client.getClientConfiguration().getProxyHost());
+		assertEquals(3128, client.getClientConfiguration().getProxyPort());
+		assertEquals("user", client.getClientConfiguration().getProxyUsername());
+		assertEquals("password", client.getClientConfiguration().getProxyPassword());
+		// No auth => client should use a S3CredentialProviderChain
+		assertEquals(ClientInspector.getDefaultProviderClass(), ClientInspector.getCredentialsProviderChain(client).getClass());
+	}
 
 	@Test
 	void testValidate() {
