@@ -35,6 +35,7 @@ class BucketPathTest {
 		// Bucket names that don't comply with S3 requirements
 		assertThrows(IllegalArgumentException.class, () -> new BucketPath(":region/file", eb)); // empty
 		assertThrows(IllegalArgumentException.class, () -> new BucketPath("a/file", eb)); //too small
+		assertThrows(IllegalArgumentException.class, () -> new BucketPath("bucket/", eb)); // path is empty
 		assertThrows(IllegalArgumentException.class, () -> new BucketPath("CantHaveUpperAtFirst/file", eb));
 		assertThrows(IllegalArgumentException.class, () -> new BucketPath("withInvalidCharInIt/file", eb));
 		

@@ -48,7 +48,11 @@ public class S3Manager implements DestinationManager<BucketPath> {
 		final AmazonS3 client = getClient(destination.getCredentials(), destination.getRegion());
 		final ObjectMetadata metadata = new ObjectMetadata();
 		metadata.setContentLength(size);
-		client.putObject(destination.getBucket(), destination.getPath(), in, metadata);
+		try {
+			client.putObject(destination.getBucket(), destination.getPath(), in, metadata);
+		} catch (SdkClientException e) {
+			throw new IOException(e);
+		}
 	}
 
 	protected AmazonS3 getClient(AWSCredentials credentials, String region) {
