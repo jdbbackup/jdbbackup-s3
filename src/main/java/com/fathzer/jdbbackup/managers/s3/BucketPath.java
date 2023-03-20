@@ -17,14 +17,15 @@ class BucketPath {
 	private String path;
 	
 	BucketPath(String fullPath, Function<String,CharSequence> extensionBuilder) {
-		int index = fullPath.indexOf('@');
+		String expandedPath = DefaultPathDecoder.INSTANCE.decodePath(fullPath);
+		int index = expandedPath.indexOf('@');
 		if (index >= 0) {
-			final String authString = DefaultPathDecoder.INSTANCE.decodePath(fullPath.substring(0, index));
+			final String authString = expandedPath.substring(0, index);
 			final PasswordAuthentication login = LoginParser.fromString(authString);
 			this.credentials = new BasicAWSCredentials(login.getUserName(), String.valueOf(login.getPassword()));
-			fullPath = fullPath.substring(index+1);
+			expandedPath = expandedPath.substring(index+1);
 		}
-		parsePath(fullPath, extensionBuilder);
+		parsePath(expandedPath, extensionBuilder);
 	}
 
 	private void parsePath(String path, Function<String, CharSequence> extensionBuilder) {

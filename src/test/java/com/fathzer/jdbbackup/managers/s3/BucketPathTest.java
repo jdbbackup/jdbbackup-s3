@@ -2,6 +2,9 @@ package com.fathzer.jdbbackup.managers.s3;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
 
 import com.fathzer.jdbbackup.utils.BasicExtensionBuilder;
@@ -34,6 +37,40 @@ class BucketPathTest {
 		assertThrows(IllegalArgumentException.class, () -> new BucketPath("a/file", eb)); //too small
 		assertThrows(IllegalArgumentException.class, () -> new BucketPath("CantHaveUpperAtFirst/file", eb));
 		assertThrows(IllegalArgumentException.class, () -> new BucketPath("withInvalidCharInIt/file", eb));
+		
+		try (SysPropHack hack = new SysPropHack("BucketPathTestProp")) {
+			hack.set("a:b@eu-west-3:bucket/jdb/test");
+			bucketPath = new BucketPath("{p=BucketPathTestProp}", eb);
+			assertEquals("a",bucketPath.getCredentials().getAWSAccessKeyId());
+			assertEquals("b",bucketPath.getCredentials().getAWSSecretKey());
+			assertEquals("bucket",bucketPath.getBucket());
+			assertEquals("eu-west-3",bucketPath.getRegion());
+			assertEquals("jdb/test.sql.gz",bucketPath.getPath());
+		}
 	}
 
+	private static final class SysPropHack implements AutoCloseable {
+		private String property;
+		private String old;
+		
+		public SysPropHack(String property) {
+			super();
+			this.property = property;
+			this.old = System.getProperty("a:b@eu-west-3:bucket/jdb/test");
+			
+		}
+		
+		public void set(String value) {
+			System.setProperty(property, value);
+		}
+
+		@Override
+		public void close() {
+			if (old!=null) {
+				System.setProperty(property, old);
+			} else {
+				System.clearProperty(property);
+			}
+		}
+	}
 }
