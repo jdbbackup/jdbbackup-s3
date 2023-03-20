@@ -22,6 +22,7 @@
 		<check-dependencies-java-version>${maven.compiler.target}</check-dependencies-java-version>
 
 		<amazon-api-version>1.12.429</amazon-api-version>
+		<jaxbVersion>2.3.1</jaxbVersion>
 
 		<sonar.organization>jdbbackup</sonar.organization>
 	</properties>
@@ -37,7 +38,11 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>${amazon-api-version}</version>
-			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>${jaxbVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

@@ -2,12 +2,15 @@ package com.fathzer.jdbbackup.managers.s3;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Function;
 
 import com.amazonaws.ClientConfiguration;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.regions.DefaultAwsRegionProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -16,12 +19,10 @@ import com.fathzer.jdbbackup.utils.ProxySettings;
 
 public class S3Manager implements DestinationManager<BucketPath> {
 	private ProxySettings proxy;
-	private AmazonS3 s3;
 	
 	@Override
 	public void setProxy(ProxySettings proxy) {
 		this.proxy = proxy;
-		this.s3 = null;
 	}
 
 	@Override
@@ -31,23 +32,30 @@ public class S3Manager implements DestinationManager<BucketPath> {
 
 	@Override
 	public BucketPath validate(String path, Function<String, CharSequence> extensionBuilder) {
-		return new BucketPath(path, extensionBuilder);
+		final BucketPath result = new BucketPath(path, extensionBuilder);
+		if (result.getRegion()==null) {
+			try {
+				result.setRegion(new DefaultAwsRegionProviderChain().getRegion());
+			} catch (SdkClientException e) {
+				throw new IllegalArgumentException("AWS region is not specified and default provider can't find it", e);
+			}
+		}
+		return result;
 	}
 
 	@Override
 	public void send(InputStream in, long size, BucketPath destination) throws IOException {
-		getClient().putObject(destination.getBucket(), destination.getPath(), in, new ObjectMetadata());
-	}
-	
-	private AmazonS3 getClient() {
-		if (s3==null) {
-			s3 = buildClient();
-		}
-		return s3;
+		final AmazonS3 client = getClient(destination.getCredentials(), destination.getRegion());
+		final ObjectMetadata metadata = new ObjectMetadata();
+		metadata.setContentLength(size);
+		client.putObject(destination.getBucket(), destination.getPath(), in, metadata);
 	}
 
-	protected AmazonS3 buildClient() {
-		final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withCredentials(new AWSCredentialsProviderChain(Arrays.asList(JSonAWSCredentials.INSTANCE, new DefaultAWSCredentialsProviderChain())));
+	protected AmazonS3 getClient(AWSCredentials credentials, String region) {
+		final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withRegion(region);
+		if (credentials!=null) {
+			clientBuilder.withCredentials(new AWSCredentialsProviderChain(Collections.singletonList(new AWSStaticCredentialsProvider(credentials))));
+		}
 		if (proxy!=null) {
 			final ClientConfiguration conf = new ClientConfiguration();
 			conf.withProxyHost(proxy.getHost()).withProxyPort(proxy.getPort());
