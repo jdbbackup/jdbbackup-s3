@@ -30,8 +30,6 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: To be deleted
-        run: mvn install:install-file -Dfile=toBeDeleted/jdbbackup-core-1.0.0.jar -DgroupId=com.fathzer -DartifactId=jdbbackup-core -Dversion=1.0.0 -Dpackaging=jar
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any

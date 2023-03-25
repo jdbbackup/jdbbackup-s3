@@ -17,6 +17,11 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fathzer.jdbbackup.DestinationManager;
 import com.fathzer.jdbbackup.utils.ProxySettings;
 
+/** A Destination manager that saves to Amazon S3 bucket.
+ * <br>The address format is: s3://[accessKey:secretKey@][region:]bucket/path.
+ * <br>If <i>accessKey:secretKey</i> are omitted, the manager uses the <a href="https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html">default AWS credentials provider chain</a>
+ * <br>If *region* is not provided, the manager uses the <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/regions/providers/DefaultAwsRegionProviderChain.html">default AWS region provider chain</a>. 
+ */
 public class S3Manager implements DestinationManager<BucketPath> {
 	private ProxySettings proxy;
 	
@@ -55,6 +60,11 @@ public class S3Manager implements DestinationManager<BucketPath> {
 		}
 	}
 
+	/** Builds an S3 client.
+	 * @param credentials The client credentials or null if they are not defined 
+	 * @param region The region (can't be null)
+	 * @return a new AmazonS3 client
+	 */
 	protected AmazonS3 getClient(AWSCredentials credentials, String region) {
 		final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withRegion(region);
 		if (credentials!=null) {
