@@ -1,4 +1,4 @@
-package com.fathzer.jdbbackup.managers.s3;
+package com.fathzer.jdbbackup.destinations.s3;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -17,7 +17,8 @@ import com.amazonaws.regions.DefaultAwsRegionProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.ClientInspector;
-import com.fathzer.jdbbackup.utils.ProxySettings;
+
+import com.fathzer.plugin.loader.utils.ProxySettings;
 
 class S3ManagerTest {
 	
@@ -36,7 +37,7 @@ class S3ManagerTest {
 		assertNotEquals(ClientInspector.getDefaultProviderClass(), ClientInspector.getCredentialsProviderChain(client).getClass());
 
 		// With authenticated proxy
-		s3.setProxy(ProxySettings.fromString("user:password@host:3128"));
+		setProxy(s3, ProxySettings.fromString("user:password@host:3128"));
 		client = (AmazonS3Client) s3.getClient(null, "region");
 		assertEquals("host", client.getClientConfiguration().getProxyHost());
 		assertEquals(3128, client.getClientConfiguration().getProxyPort());
@@ -46,7 +47,7 @@ class S3ManagerTest {
 		assertEquals(ClientInspector.getDefaultProviderClass(), ClientInspector.getCredentialsProviderChain(client).getClass());
 		
 		// With authenticated proxy without password
-		s3.setProxy(ProxySettings.fromString("user:@host:3128"));
+		setProxy(s3, ProxySettings.fromString("user:@host:3128"));
 		client = (AmazonS3Client) s3.getClient(null, "region");
 		assertEquals("host", client.getClientConfiguration().getProxyHost());
 		assertEquals(3128, client.getClientConfiguration().getProxyPort());
@@ -54,12 +55,16 @@ class S3ManagerTest {
 		assertNull(client.getClientConfiguration().getProxyPassword());
 
 		// With unauthenticated proxy
-		s3.setProxy(ProxySettings.fromString("otherhost:4128"));
+		setProxy(s3, ProxySettings.fromString("otherhost:4128"));
 		client = (AmazonS3Client) s3.getClient(null, "region");
 		assertEquals("otherhost", client.getClientConfiguration().getProxyHost());
 		assertEquals(4128, client.getClientConfiguration().getProxyPort());
 		assertNull(client.getClientConfiguration().getProxyUsername());
 		assertNull(client.getClientConfiguration().getProxyPassword());
+	}
+	
+	private static void setProxy(S3Manager s3, ProxySettings settings) {
+		s3.setProxy(settings.toProxy(), settings.getLogin());
 	}
 
 	@Test

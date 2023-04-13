@@ -1,4 +1,4 @@
-package com.fathzer.jdbbackup.managers.s3;
+package com.fathzer.jdbbackup.destinations.s3;
 
 import java.net.PasswordAuthentication;
 import java.util.function.Function;
@@ -7,7 +7,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.internal.BucketNameUtils;
 import com.fathzer.jdbbackup.DefaultPathDecoder;
 import com.fathzer.jdbbackup.DestinationManager;
-import com.fathzer.jdbbackup.utils.LoginParser;
+import com.fathzer.plugin.loader.utils.LoginParser;
 
 class BucketPath {
 	private static final String WRONG_DEST_MESS = "Destination should conform to the format [key:secret@][region:]bucket/path";

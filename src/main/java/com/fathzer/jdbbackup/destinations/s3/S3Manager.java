@@ -1,7 +1,10 @@
-package com.fathzer.jdbbackup.managers.s3;
+package com.fathzer.jdbbackup.destinations.s3;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.util.Collections;
 import java.util.function.Function;
 
@@ -15,19 +18,22 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fathzer.jdbbackup.DestinationManager;
-import com.fathzer.jdbbackup.utils.ProxySettings;
+import com.fathzer.jdbbackup.ProxyCompliant;
 
 /** A Destination manager that saves to Amazon S3 bucket.
  * <br>The address format is: s3://[accessKey:secretKey@][region:]bucket/path.
  * <br>If <i>accessKey:secretKey</i> are omitted, the manager uses the <a href="https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html">default AWS credentials provider chain</a>
  * <br>If *region* is not provided, the manager uses the <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/regions/providers/DefaultAwsRegionProviderChain.html">default AWS region provider chain</a>. 
  */
-public class S3Manager implements DestinationManager<BucketPath> {
-	private ProxySettings proxy;
+public class S3Manager implements DestinationManager<BucketPath>, ProxyCompliant {
+	private Proxy proxy;
+	private PasswordAuthentication proxyAuth;
 	
 	@Override
-	public void setProxy(ProxySettings proxy) {
+	public void setProxy(Proxy proxy, PasswordAuthentication auth) {
+		ProxyCompliant.super.setProxy(proxy, auth);
 		this.proxy = proxy;
+		this.proxyAuth = auth;
 	}
 
 	@Override
@@ -72,11 +78,11 @@ public class S3Manager implements DestinationManager<BucketPath> {
 		}
 		if (proxy!=null) {
 			final ClientConfiguration conf = new ClientConfiguration();
-			conf.withProxyHost(proxy.getHost()).withProxyPort(proxy.getPort());
-			if (proxy.getLogin()!=null) {
-				conf.withProxyUsername(proxy.getLogin().getUserName());
-				if (proxy.getLogin().getPassword().length>0) {
-					conf.withProxyPassword(String.valueOf(proxy.getLogin().getPassword()));
+			conf.withProxyHost(((InetSocketAddress)proxy.address()).getHostString()).withProxyPort(((InetSocketAddress)proxy.address()).getPort());
+			if (proxyAuth!=null) {
+				conf.withProxyUsername(proxyAuth.getUserName());
+				if (proxyAuth.getPassword().length>0) {
+					conf.withProxyPassword(String.valueOf(proxyAuth.getPassword()));
 				}
 			}
 			clientBuilder.withClientConfiguration(conf);

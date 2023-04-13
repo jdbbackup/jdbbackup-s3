@@ -1,1 +1,1 @@
-com.fathzer.jdbbackup.managers.s3.S3Manager
+com.fathzer.jdbbackup.destinations.s3.S3Manager

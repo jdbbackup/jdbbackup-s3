@@ -1,9 +1,6 @@
-package com.fathzer.jdbbackup.managers.s3;
+package com.fathzer.jdbbackup.destinations.s3;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.Closeable;
-import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
