@@ -26,7 +26,7 @@ import com.fathzer.jdbbackup.ProxyCompliant;
  * <br>If *region* is not provided, the manager uses the <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/regions/providers/DefaultAwsRegionProviderChain.html">default AWS region provider chain</a>. 
  */
 public class S3Manager implements DestinationManager<BucketPath>, ProxyCompliant {
-	private Proxy proxy;
+	private Proxy proxy = Proxy.NO_PROXY;
 	private PasswordAuthentication proxyAuth;
 	
 	@Override
@@ -76,7 +76,7 @@ public class S3Manager implements DestinationManager<BucketPath>, ProxyCompliant
 		if (credentials!=null) {
 			clientBuilder.withCredentials(new AWSCredentialsProviderChain(Collections.singletonList(new AWSStaticCredentialsProvider(credentials))));
 		}
-		if (proxy!=null) {
+		if (!Proxy.NO_PROXY.equals(proxy)) {
 			final ClientConfiguration conf = new ClientConfiguration();
 			conf.withProxyHost(((InetSocketAddress)proxy.address()).getHostString()).withProxyPort(((InetSocketAddress)proxy.address()).getPort());
 			if (proxyAuth!=null) {

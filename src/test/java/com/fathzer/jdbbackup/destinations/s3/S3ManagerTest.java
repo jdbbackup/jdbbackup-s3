@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.Proxy;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
@@ -26,7 +27,7 @@ class S3ManagerTest {
 	void testScheme() {
 		assertEquals("s3", new S3Manager().getScheme());
 	}
-	
+
 	@Test
 	void testBuildClient() {
 		S3Manager s3 = new S3Manager();
@@ -36,6 +37,13 @@ class S3ManagerTest {
 		// No auth => client should use a customized credential provider chain
 		assertNotEquals(ClientInspector.getDefaultProviderClass(), ClientInspector.getCredentialsProviderChain(client).getClass());
 
+		// With No Proxy (First implementation had a bug on that case)
+		s3.setProxy(Proxy.NO_PROXY, null);
+		client = (AmazonS3Client) s3.getClient(null,"region");
+		assertNull(client.getClientConfiguration().getProxyHost());
+		assertThrows(IllegalArgumentException.class, () -> s3.setProxy(null, null));
+		
+		
 		// With authenticated proxy
 		setProxy(s3, ProxySettings.fromString("user:password@host:3128"));
 		client = (AmazonS3Client) s3.getClient(null, "region");
