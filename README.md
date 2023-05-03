@@ -1,3 +1,8 @@
+![Maven Central](https://img.shields.io/maven-central/v/com.fathzer/jdbbackup-s3)
+![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jdbbackup_jdbbackup-s3&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jdbbackup_jdbbackup-s3)
+[![javadoc](https://javadoc.io/badge2/com.fathzer/jdbbackup-s3/javadoc.svg)](https://javadoc.io/doc/com.fathzer/jdbbackup-s3)
+
 # jdbbackup-s3
 An Amazon S3 [JDBBackup](https://github.com/jdbbackup/jdbbackup-core) destination manager
 
